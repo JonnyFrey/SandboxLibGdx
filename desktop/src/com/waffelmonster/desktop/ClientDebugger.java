@@ -2,33 +2,86 @@ package com.waffelmonster.desktop;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
-import com.waffelmonster.message.ConnectRequest;
-import com.waffelmonster.message.ConnectResponse;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.FrameworkMessage;
+import com.esotericsoftware.kryonet.Listener;
+import com.google.gson.Gson;
+import com.waffelmonster.message.*;
+import com.waffelmonster.message.tictactoe.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 
-public class ClientDebugger {
+import static com.waffelmonster.SandboxGame.DEFAULT_ADDRESS;
+import static com.waffelmonster.SandboxGame.DEFAULT_PORT;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        final Client client = new Client();
+public class ClientDebugger extends Listener {
+
+    private final Gson gson = new Gson();
+    private final Client client;
+    private final String name;
+
+    public ClientDebugger(final String name) {
+        this.client = new Client();
+        this.name = name;
 
         final Kryo kryo = client.getKryo();
-        kryo.register(ConnectRequest.class);
-        kryo.register(ConnectResponse.class);
+        Arrays.asList(
+                ConnectRequest.class, ConnectResponse.class,
+                DisconnectRequest.class, DisconnectResponse.class,
+                MoveRequest.class, MoveResponse.class,
+                ResetRequest.class, ResetResponse.class,
+                BoardRequest.class, BoardResponse.class,
+                RoomChatRequest.class, RoomChatResponse.class,
+                String[].class, String[][].class
+        ).forEach(kryo::register);
 
-        client.addListener(new ClientListener());
+        client.addListener(this);
 
-        client.start();
-        client.connect(10000, args[0], 42069);
+        this.client.start();
+    }
+
+    public void execute() throws IOException, InterruptedException {
+        client.connect(10000, DEFAULT_ADDRESS, DEFAULT_PORT);
 
         final ConnectRequest request = new ConnectRequest();
-        request.playerName = args[1];
+        request.playerName = name;
 
         client.sendTCP(request);
 
+        //Break Point (suspend thread only) on the Thread Line to _interactively_ play
         Thread.sleep(5000);
 
         client.stop();
+    }
+
+    public void getBoard() {
+        this.client.sendTCP(new BoardRequest());
+    }
+
+    public void makeMove(int x, int y) {
+        final MoveRequest request = new MoveRequest();
+        request.playerName = this.name;
+        request.x = x;
+        request.y = y;
+        this.client.sendTCP(request);
+    }
+
+    public void reset() {
+        this.client.sendTCP(new ResetRequest());
+    }
+
+    @Override
+    public void received(Connection connection, Object object) {
+        if (!(object instanceof FrameworkMessage.KeepAlive)) {
+            System.out.println(gson.toJson(object));
+        }
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        // Set your player name here
+        ClientDebugger debugger = new ClientDebugger("waffelmonster");
+        debugger.execute();
     }
 
 }
