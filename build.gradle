@@ -38,6 +38,14 @@ allprojects {
     }
 }
 
+project(":server") {
+    apply plugin: "java-library"
+
+    dependencies {
+        implementation project(":core")
+    }
+}
+
 project(":desktop") {
     apply plugin: "java-library"
 
@@ -52,7 +60,6 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop"
-        api "de.tomgrill.gdxfacebook:gdx-facebook-desktop:1.4.1"
         api "de.tomgrill.gdxdialogs:gdx-dialogs-desktop:1.2.5"
         
     }
@@ -63,22 +70,20 @@ project(":core") {
 
 
     dependencies {
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
-        api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
-        api "com.esotericsoftware.spine:spine-libgdx:3.6.53.1"
-        api "com.underwaterapps.overlap2druntime:overlap2d-runtime-libgdx:0.1.0"
-        api "com.kotcrab.vis:vis-ui:1.3.0"
-        api "net.dermetfan.libgdx-utils:libgdx-utils:0.13.4"
-        api "net.dermetfan.libgdx-utils:libgdx-utils-box2d:0.13.4"
-        api "de.tomgrill.gdxfacebook:gdx-facebook-core:1.4.1"
-        api "de.tomgrill.gdxdialogs:gdx-dialogs-core:1.2.5"
-        api "com.github.czyzby:gdx-kiwi:1.9.1.9.6"
+        api "com.badlogicgames.gdx:gdx:$gdxVersion" // Main library
+        api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion" // 2D physics library
+        api "com.badlogicgames.gdx:gdx-controllers:$gdxVersion" // allows for xbox controller support
+        api "com.badlogicgames.gdx:gdx-ai:$aiVersion" // basic framework for ai
+        api "com.badlogicgames.ashley:ashley:$ashleyVersion" // Entity Framework
+        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion" // Font Rendering
+        api "com.badlogicgames.gdx:gdx-bullet:$gdxVersion" // Bullet Physics
+        api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion" // Lighting library
+        api "com.esotericsoftware.spine:spine-libgdx:3.6.53.1" // Adds spine skeletal animation support
+        api "com.kotcrab.vis:vis-ui:1.3.0" // Adds basic ui components
+        api "net.dermetfan.libgdx-utils:libgdx-utils:0.13.4" // Basic Utility Functions
+        api "net.dermetfan.libgdx-utils:libgdx-utils-box2d:0.13.4" // Basic 2D physics utility functions
+        api "de.tomgrill.gdxdialogs:gdx-dialogs-core:1.2.5" // For spawning dialog windows
+        api "com.github.czyzby:gdx-kiwi:1.9.1.9.6" // Guava esk library
         api "com.github.czyzby:gdx-lml:1.9.1.9.6"
         api "com.github.czyzby:gdx-lml-vis:1.9.1.9.6"
         
