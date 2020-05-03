@@ -36,6 +36,7 @@ public class TicTacToeRoom extends Room {
         boolean gameOver = isGameOver();
         if (gameOver) {
             this.board = new String[3][3];
+            this.currentPlayer = null;
         }
         return gameOver;
     }
