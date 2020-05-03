@@ -14,6 +14,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class SandboxGame extends Game {
 
+    public static final String DEFAULT_ADDRESS = "box.popcraft.org";
+    public static final int DEFAULT_PORT = 42069;
+
     private Injector injector;
     private AssetManager manager;
 
@@ -27,7 +30,7 @@ public class SandboxGame extends Game {
         this.screenCache = new EnumMap<>(Screens.class);
         this.injector = Guice.createInjector(new GameModule(this));
         this.manager = injector.getInstance(AssetManager.class);
-        this.updateScreen(Screens.CONNECT);
+        this.updateScreen(Screens.TIC_TAC_TOE);
     }
 
     public void transition(final Screens screens) {
