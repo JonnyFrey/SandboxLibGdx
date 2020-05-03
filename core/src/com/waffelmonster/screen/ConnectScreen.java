@@ -14,6 +14,8 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.waffelmonster.SandboxGame;
+import com.waffelmonster.assets.Screens;
 import com.waffelmonster.compat.JChangeListener;
 import com.waffelmonster.compat.JTask;
 import com.waffelmonster.message.ConnectRequest;
@@ -27,124 +29,31 @@ import static com.waffelmonster.GameModule.SPLASH_TEXTURE;
 
 public class ConnectScreen extends Listener implements Screen {
 
-    private final Stage stage;
-
-    private final Image splash;
-    private final Label splashLabel;
-
-    private final TextField connectionField;
-    private final Label connectionFieldLabel;
-
-    private final TextField usernameField;
-    private final Label usernameLabel;
-
-    private final TextButton button;
+    private final SandboxGame game;
+    private final Client client;
+    private final Skin skin;
+    private final Texture splashTexture;
     private final Label messageLabel;
 
-    private final Client client;
+    private Stage stage;
 
     @Inject
     public ConnectScreen(
+            final SandboxGame game,
             final Client client,
             @Named(NEON_SKIN) final Skin skin,
-            @Named(SPLASH_TEXTURE) final Texture splash
+            @Named(SPLASH_TEXTURE) final Texture splashTexture
             ) {
+        this.game = game;
         this.client = client;
-        this.client.addListener(this);
-
-        this.stage = new Stage();
-
-        this.splash = new Image(splash);
-        this.splashLabel = new Label("Sandbox", skin);
-
-        this.connectionField = new TextField("box.popcraft.org", skin);
-        this.connectionFieldLabel = new Label("Enter Server Address:", skin);
-
-        this.usernameField = new TextField("waffelmonster", skin);
-        this.usernameLabel = new Label("Enter Username:", skin);
-
-        this.button = new TextButton("Connect", skin);
+        this.skin = skin;
+        this.splashTexture = splashTexture;
 
         this.messageLabel = new Label(null, skin);
         this.messageLabel.setVisible(false);
         this.messageLabel.addAction(Actions.alpha(0));
         this.messageLabel.act(0);
         this.messageLabel.addAction(Actions.forever(Actions.sequence(Actions.fadeIn(FADE_TIME), Actions.fadeOut(FADE_TIME))));
-
-        this.stage.addActor(this.splash);
-        this.stage.addActor(this.splashLabel);
-        this.stage.addActor(this.connectionField);
-        this.stage.addActor(this.connectionFieldLabel);
-        this.stage.addActor(this.usernameField);
-        this.stage.addActor(this.usernameLabel);
-        this.stage.addActor(this.button);
-        this.stage.addActor(this.messageLabel);
-
-        this.connectionField.setWidth(250f);
-        this.usernameField.setWidth(250f);
-
-        this.splash.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.splash.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 4f * 3f) - this.splash.getHeight() / 2f
-        );
-        this.splashLabel.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.splashLabel.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 12f * 7) - this.splashLabel.getHeight() / 2f
-        );
-        this.connectionFieldLabel.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.connectionFieldLabel.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 24f * 11) - this.connectionFieldLabel.getHeight() / 2f
-        );
-        this.connectionField.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.connectionField.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 24f * 9) - this.connectionField.getHeight() / 2f
-        );
-        this.usernameLabel.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.usernameLabel.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 24f * 7) - this.usernameLabel.getHeight() / 2f
-        );
-        this.usernameField.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.usernameField.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 24f * 5) - this.usernameField.getHeight() / 2f
-        );
-        this.button.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.button.getWidth() / 2f,
-                (Gdx.graphics.getHeight() / 24f * 3) - this.button.getHeight() / 2f
-        );
-
-
-        this.stage.addListener(new JChangeListener((changeEvent, actor) -> {
-            if (actor.equals(button)) {
-                this.messageLabel.setVisible(false);
-                System.out.println("Attempting to connect");
-                try {
-                    this.client.connect(3000, this.connectionField.getText(), 42069);
-
-                    final ConnectRequest request = new ConnectRequest();
-                    request.playerName = this.usernameField.getText();
-
-                    this.client.sendTCP(request);
-                    System.out.println("Request sent");
-                } catch (IOException e) {
-                    System.out.println("Failed");
-                    showMessage("Failed to connect to server", Color.RED);
-                }
-            }
-        }));
-
-        Gdx.input.setInputProcessor(this.stage);
-    }
-
-    private void showMessage(final String message, final Color color) {
-        this.messageLabel.setVisible(false);
-        this.messageLabel.setText(message);
-        this.messageLabel.setColor(color);
-        this.messageLabel.setPosition(
-                (Gdx.graphics.getWidth() / 2f) - this.messageLabel.getPrefWidth() / 2f,
-                (Gdx.graphics.getHeight() / 48f * 3) - this.messageLabel.getPrefHeight() / 2f
-        );
-        this.messageLabel.setVisible(true);
-        Timer.schedule(new JTask(() -> this.messageLabel.setVisible(false)), 3.9f);
     }
 
     @Override
@@ -166,6 +75,20 @@ public class ConnectScreen extends Listener implements Screen {
         this.stage.dispose();
     }
 
+    private void showMessage(final String message, final Color color) {
+        if (this.messageLabel != null) {
+            this.messageLabel.setVisible(false);
+            this.messageLabel.setText(message);
+            this.messageLabel.setColor(color);
+            this.messageLabel.setPosition(
+                    (Gdx.graphics.getWidth() / 2f) - this.messageLabel.getPrefWidth() / 2f,
+                    (Gdx.graphics.getHeight() / 48f * 3) - this.messageLabel.getPrefHeight() / 2f
+            );
+            this.messageLabel.setVisible(true);
+            Timer.schedule(new JTask(() -> this.messageLabel.setVisible(false)), 3.9f);
+        }
+    }
+
     @Override
     public void received(Connection connection, Object object) {
         System.out.println("Response received " + object);
@@ -173,6 +96,7 @@ public class ConnectScreen extends Listener implements Screen {
             final ConnectResponse response = (ConnectResponse) object;
             if (response.success) {
                 System.out.println("Transition");
+                this.game.transition(Screens.TIC_TAC_TOE);
                 this.showMessage("Connection Successful", Color.GREEN);
             } else {
                 this.showMessage("Username is already taken", Color.RED);
@@ -181,23 +105,101 @@ public class ConnectScreen extends Listener implements Screen {
     }
 
     @Override
+    public void show() {
+
+        final Image splash = new Image(this.splashTexture);
+        final Label splashLabel = new Label("Sandbox", skin);
+
+        final TextField connectionField = new TextField("box.popcraft.org", skin);
+        final Label connectionFieldLabel = new Label("Enter Server Address:", skin);
+
+        final TextField usernameField = new TextField("waffelmonster", skin);
+        final Label usernameLabel = new Label("Enter Username:", skin);
+
+        final TextButton button = new TextButton("Connect", skin);
+
+        this.stage = new Stage();
+
+        this.stage.addActor(splash);
+        this.stage.addActor(splashLabel);
+        this.stage.addActor(connectionField);
+        this.stage.addActor(connectionFieldLabel);
+        this.stage.addActor(usernameField);
+        this.stage.addActor(usernameLabel);
+        this.stage.addActor(button);
+        this.stage.addActor(this.messageLabel);
+
+        connectionField.setWidth(250f);
+        usernameField.setWidth(250f);
+
+        splash.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - splash.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 4f * 3f) - splash.getHeight() / 2f
+        );
+        splashLabel.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - splashLabel.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 12f * 7) - splashLabel.getHeight() / 2f
+        );
+        connectionFieldLabel.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - connectionFieldLabel.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 24f * 11) - connectionFieldLabel.getHeight() / 2f
+        );
+        connectionField.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - connectionField.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 24f * 9) - connectionField.getHeight() / 2f
+        );
+        usernameLabel.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - usernameLabel.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 24f * 7) - usernameLabel.getHeight() / 2f
+        );
+        usernameField.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - usernameField.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 24f * 5) - usernameField.getHeight() / 2f
+        );
+        button.setPosition(
+                (Gdx.graphics.getWidth() / 2f) - button.getWidth() / 2f,
+                (Gdx.graphics.getHeight() / 24f * 3) - button.getHeight() / 2f
+        );
+
+        this.stage.addListener(new JChangeListener((changeEvent, actor) -> {
+            if (actor.equals(button)) {
+                this.messageLabel.setVisible(false);
+                System.out.println("Attempting to connect");
+                try {
+                    this.client.connect(3000, connectionField.getText(), 42069);
+
+                    final ConnectRequest request = new ConnectRequest();
+                    request.playerName = usernameField.getText();
+
+                    this.client.sendTCP(request);
+                    System.out.println("Request sent");
+                } catch (IOException e) {
+                    System.out.println("Failed");
+                    showMessage("Failed to connect to server", Color.RED);
+                }
+            }
+        }));
+
+        Gdx.input.setInputProcessor(this.stage);
+        this.client.addListener(this);
+    }
+
+
+    @Override
     public void pause() {
-        //No Op
+        this.stage.dispose();
+        this.stage = null;
     }
 
     @Override
     public void resume() {
-        //No Op
+        this.show();
     }
 
     @Override
     public void hide() {
-        //No Op
-    }
-
-    @Override
-    public void show() {
-        //No Op
+        Gdx.input.setInputProcessor(null);
+        this.client.removeListener(this);
     }
 
 }

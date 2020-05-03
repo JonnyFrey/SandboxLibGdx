@@ -2,6 +2,7 @@ package com.waffelmonster;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.esotericsoftware.kryo.Kryo;
@@ -20,10 +21,16 @@ public class GameModule extends AbstractModule {
     public static final String NEON_SKIN = "neon_skin";
     public static final String SPLASH_TEXTURE = "splash_texture";
 
+    private final SandboxGame game;
+
+    public GameModule(final SandboxGame game) {
+        this.game = game;
+    }
+
     @Override
     protected void configure() {
-        // No Op
         this.bind(AssetManager.class).toInstance(new AssetManager());
+        this.bind(SandboxGame.class).toInstance(this.game);
     }
 
     @Provides
@@ -57,6 +64,11 @@ public class GameModule extends AbstractModule {
     @Provides
     public Texture provideSplashTexture(final AssetManager manager) {
         return get(manager, Textures.SPLASH);
+    }
+
+    @Provides
+    public SpriteBatch provideSpriteBatch() {
+        return new SpriteBatch();
     }
 
     public void load(final AssetManager manager, final Skins skins) {
