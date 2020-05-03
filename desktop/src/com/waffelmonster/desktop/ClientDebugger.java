@@ -71,6 +71,12 @@ public class ClientDebugger extends Listener {
         this.client.sendTCP(new ResetRequest());
     }
 
+    public void send(final String message) {
+        RoomChatRequest request1 = new RoomChatRequest();
+        request1.message = message;
+        this.client.sendTCP(request1);
+    }
+
     @Override
     public void received(Connection connection, Object object) {
         if (!(object instanceof FrameworkMessage.KeepAlive)) {
