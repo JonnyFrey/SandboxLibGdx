@@ -48,9 +48,6 @@ public class ServerLauncher {
                     connectResponse.success = ticTacToeRoom.join(connection, player);
                     connection.sendTCP(connectResponse);
                 } else if (object instanceof DisconnectRequest) {
-                    DisconnectRequest disconnectRequest = (DisconnectRequest) object;
-                    System.out.println(disconnectRequest.playerName);
-                    Player player = new Player(disconnectRequest.playerName);
                     DisconnectResponse disconnectResponse = new DisconnectResponse();
                     disconnectResponse.success = ticTacToeRoom.quit(connection);
                     connection.sendTCP(disconnectResponse);
