@@ -86,7 +86,8 @@ project(":core") {
         api "com.github.czyzby:gdx-kiwi:1.9.1.9.6" // Guava esk library
         api "com.github.czyzby:gdx-lml:1.9.1.9.6"
         api "com.github.czyzby:gdx-lml-vis:1.9.1.9.6"
-        api "kryonet:kryonet:2.21"
-        
+        api "com.esotericsoftware:kryonet:2.22.0-RC1"
+
+
     }
 }
