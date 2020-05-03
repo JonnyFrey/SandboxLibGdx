@@ -8,12 +8,15 @@ import com.waffelmonster.message.ConnectRequest;
 import com.waffelmonster.message.ConnectResponse;
 import com.waffelmonster.message.DisconnectRequest;
 import com.waffelmonster.message.DisconnectResponse;
+import com.waffelmonster.message.RoomChatRequest;
+import com.waffelmonster.message.RoomChatResponse;
 import com.waffelmonster.message.tictactoe.BoardRequest;
 import com.waffelmonster.message.tictactoe.BoardResponse;
 import com.waffelmonster.message.tictactoe.MoveRequest;
 import com.waffelmonster.message.tictactoe.MoveResponse;
 import com.waffelmonster.message.tictactoe.ResetRequest;
 import com.waffelmonster.message.tictactoe.ResetResponse;
+import com.waffelmonster.server.state.ChatMessage;
 import com.waffelmonster.server.state.Player;
 import com.waffelmonster.server.state.tictactoe.TicTacToeRoom;
 
@@ -34,7 +37,8 @@ public class ServerLauncher {
                 DisconnectRequest.class, DisconnectResponse.class,
                 MoveRequest.class, MoveResponse.class,
                 ResetRequest.class, ResetResponse.class,
-                BoardRequest.class, BoardResponse.class
+                BoardRequest.class, BoardResponse.class,
+                RoomChatRequest.class, RoomChatResponse.class
         ).forEach(kryo::register);
         server.addListener(new Listener() {
             @Override
@@ -64,6 +68,15 @@ public class ServerLauncher {
                     BoardResponse boardResponse = new BoardResponse();
                     boardResponse.board = ticTacToeRoom.getBoard();
                     connection.sendTCP(boardResponse);
+                } else if (object instanceof RoomChatRequest) {
+                    RoomChatRequest roomChatRequest = (RoomChatRequest) object;
+                    ChatMessage chatMessage = new ChatMessage(ticTacToeRoom.getPlayer(connection), roomChatRequest.message);
+                    ticTacToeRoom.addMessage(chatMessage);
+                    RoomChatResponse roomChatResponse = new RoomChatResponse();
+                    roomChatResponse.roomName = ticTacToeRoom.getName();
+                    roomChatResponse.playerName = chatMessage.getPlayer().getName();
+                    roomChatResponse.message = chatMessage.getMessage();
+                    connection.sendTCP(roomChatResponse);
                 }
             }
 
