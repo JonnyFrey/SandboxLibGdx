@@ -76,7 +76,11 @@ public class ServerLauncher {
                     roomChatResponse.roomName = ticTacToeRoom.getName();
                     roomChatResponse.playerName = chatMessage.getPlayer().getName();
                     roomChatResponse.message = chatMessage.getMessage();
-                    connection.sendTCP(roomChatResponse);
+                    for (Connection c : server.getConnections()) {
+                        if (ticTacToeRoom.getPlayers().containsKey(c)) {
+                            c.sendTCP(roomChatResponse);
+                        }
+                    }
                 }
             }
 
