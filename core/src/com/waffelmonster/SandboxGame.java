@@ -46,7 +46,6 @@ public class SandboxGame extends Game {
                         enm -> injector.getInstance(enm.getScreenClass())
                 )
         );
-
     }
 
     @Override
@@ -55,6 +54,7 @@ public class SandboxGame extends Game {
 
         if (transitionLock.readLock().tryLock() && this.transition != null) {
             this.updateScreen(this.transition);
+            this.transition = null;
         }
         transitionLock.readLock().unlock();
 
