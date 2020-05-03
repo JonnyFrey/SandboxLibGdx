@@ -1,10 +1,12 @@
 package com.waffelmonster.server.state;
 
+import com.esotericsoftware.kryonet.Connection;
+
 import java.util.HashMap;
 
 public class Room {
     private String name;
-    private HashMap<String, Player> players;
+    private HashMap<Connection, Player> players;
 
     public Room(String name) {
         this.name = name;
@@ -19,19 +21,19 @@ public class Room {
         this.name = name;
     }
 
-    public Player getPlayer(String player) {
-        return this.players.get(player);
+    public Player getPlayer(Connection connection) {
+        return this.players.get(connection);
     }
 
-    public boolean join(Player player) {
-        boolean hasJoined = this.players.containsKey(player.getName());
+    public boolean join(Connection connection, Player player) {
+        boolean hasJoined = this.players.containsKey(connection);
         if (!hasJoined) {
-            this.players.put(player.getName(), player);
+            this.players.put(connection, player);
         }
         return !hasJoined;
     }
 
-    public boolean quit(Player player) {
-        return this.players.remove(player.getName()) != null;
+    public boolean quit(Connection connection) {
+        return this.players.remove(connection) != null;
     }
 }

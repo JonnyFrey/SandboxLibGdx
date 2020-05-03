@@ -38,6 +38,7 @@ public class ServerLauncher {
                 BoardRequest.class, BoardResponse.class
         ).forEach(kryo::register);
         server.addListener(new Listener() {
+            @Override
             public void received(Connection connection, Object object) {
                 System.out.println(connection.getRemoteAddressTCP());
                 if (object instanceof ConnectRequest) {
@@ -45,14 +46,14 @@ public class ServerLauncher {
                     System.out.println(connectRequest.playerName);
                     Player player = new Player(connectRequest.playerName);
                     ConnectResponse connectResponse = new ConnectResponse();
-                    connectResponse.success = ticTacToeRoom.join(player);
+                    connectResponse.success = ticTacToeRoom.join(connection, player);
                     connection.sendTCP(connectResponse);
                 } else if (object instanceof DisconnectRequest) {
                     DisconnectRequest disconnectRequest = (DisconnectRequest) object;
                     System.out.println(disconnectRequest.playerName);
                     Player player = new Player(disconnectRequest.playerName);
                     DisconnectResponse disconnectResponse = new DisconnectResponse();
-                    disconnectResponse.success = ticTacToeRoom.quit(player);
+                    disconnectResponse.success = ticTacToeRoom.quit(connection);
                     connection.sendTCP(disconnectResponse);
                 } else if (object instanceof MoveRequest) {
                     MoveRequest moveRequest = (MoveRequest) object;
@@ -68,6 +69,11 @@ public class ServerLauncher {
                     boardResponse.board = ticTacToeRoom.getBoard();
                     connection.sendTCP(boardResponse);
                 }
+            }
+
+            @Override
+            public void disconnected(Connection connection) {
+                ticTacToeRoom.quit(connection);
             }
         });
     }
