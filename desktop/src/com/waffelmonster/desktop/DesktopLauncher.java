@@ -7,6 +7,9 @@ import com.waffelmonster.SandboxGame;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new SandboxGame(), config);
+		config.title = "Sandbox";
+		config.width = 1080;
+		config.height = 810;
+		LwjglApplication app = new LwjglApplication(new SandboxGame(), config);
 	}
 }
