@@ -19,7 +19,6 @@ import com.waffelmonster.server.state.tictactoe.TicTacToeRoom;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 public class ServerLauncher {
     private static final int PORT = 42069;
