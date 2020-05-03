@@ -13,6 +13,7 @@ import com.google.inject.name.Named;
 import com.waffelmonster.assets.Skins;
 import com.waffelmonster.message.ConnectRequest;
 import com.waffelmonster.message.ConnectResponse;
+import com.waffelmonster.message.KryoUtils;
 
 public class GameModule extends AbstractModule {
 
@@ -34,12 +35,7 @@ public class GameModule extends AbstractModule {
     @Singleton
     public Client provideClient() {
         final Client client = new Client();
-
-        final Kryo kryo = client.getKryo();
-
-        kryo.register(ConnectRequest.class);
-        kryo.register(ConnectResponse.class);
-
+        KryoUtils.registerMessages(client.getKryo());
         client.start();
         return client;
     }

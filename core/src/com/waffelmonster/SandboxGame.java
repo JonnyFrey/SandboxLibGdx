@@ -30,7 +30,7 @@ public class SandboxGame extends Game {
         this.screenCache = new EnumMap<>(Screens.class);
         this.injector = Guice.createInjector(new GameModule(this));
         this.manager = injector.getInstance(AssetManager.class);
-        this.updateScreen(Screens.TIC_TAC_TOE);
+        this.updateScreen(Screens.CONNECT);
     }
 
     public void transition(final Screens screens) {

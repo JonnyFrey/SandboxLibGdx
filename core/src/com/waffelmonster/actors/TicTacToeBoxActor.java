@@ -7,12 +7,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 public class TicTacToeBoxActor extends Image {
 
+    public enum State {
+        BLANK, X, O
+    }
+
     private final Drawable blankDraw;
     private final Drawable xDraw;
     private final Drawable oDraw;
     private final int xPos;
     private final int yPos;
-    private int type;
 
     public TicTacToeBoxActor(final Drawable blankDraw, final Drawable xDraw, final Drawable oDraw, int xPos, int yPos) {
         this.blankDraw = blankDraw;
@@ -24,30 +27,29 @@ public class TicTacToeBoxActor extends Image {
         this.xPos = xPos;
         this.yPos = yPos;
 
-        this.type = 0;
-
         this.addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if(super.touchDown(event, x, y, pointer, button)) {
                     System.out.println("Clicked " + xPos + " " + yPos);
-                    type = (type + 1) % 3;
-                    switch (type) {
-                        case 0:
-                            setDrawable(blankDraw);
-                            break;
-                        case 1:
-                            setDrawable(xDraw);
-                            break;
-                        case 2:
-                            setDrawable(oDraw);
-                            break;
-                    }
-                    return true;
                 }
                 return false;
             }
         });
+    }
+
+    public void setState(final State state) {
+        switch (state) {
+            case BLANK:
+                this.setDrawable(this.blankDraw);
+                break;
+            case X:
+                this.setDrawable(this.xDraw);
+                break;
+            case O:
+                this.setDrawable(this.oDraw);
+                break;
+        }
     }
 
     @Override
@@ -73,4 +75,11 @@ public class TicTacToeBoxActor extends Image {
 
     }
 
+    public int getxPos() {
+        return xPos;
+    }
+
+    public int getyPos() {
+        return yPos;
+    }
 }

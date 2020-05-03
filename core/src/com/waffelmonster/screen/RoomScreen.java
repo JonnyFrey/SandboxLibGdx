@@ -9,16 +9,24 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.waffelmonster.SandboxGame;
 import com.waffelmonster.actors.TicTacToeBoxActor;
+import com.waffelmonster.actors.TicTacToeBoxActor.State;
 import com.waffelmonster.assets.AssetUtils;
 import com.waffelmonster.assets.Textures;
+import com.waffelmonster.compat.JTask;
+import com.waffelmonster.message.tictactoe.BoardRequest;
+import com.waffelmonster.message.tictactoe.BoardResponse;
 
 import static com.waffelmonster.GameModule.NEON_SKIN;
+import static com.waffelmonster.actors.TicTacToeBoxActor.State.*;
 
 public class RoomScreen extends Listener implements Screen {
 
@@ -31,6 +39,7 @@ public class RoomScreen extends Listener implements Screen {
     private final Texture oTexture;
 
     private Stage stage;
+    private Table board;
 
     @Inject
     public RoomScreen(
@@ -67,9 +76,9 @@ public class RoomScreen extends Listener implements Screen {
     public void show() {
         this.stage = new Stage();
 
-        Table board = new Table();
+        this.board = new Table();
 
-        board.setBackground(new TextureRegionDrawable(new TextureRegion(this.boardTexture)));
+        this.board.setBackground(new TextureRegionDrawable(new TextureRegion(this.boardTexture)));
 
         final Image image = new Image();
 
@@ -87,17 +96,17 @@ public class RoomScreen extends Listener implements Screen {
                 blank, xImage, oImage
         );
 
-        board.add(builder.create(0, 0));
-        board.add(builder.create(0, 1));
-        board.add(builder.create(0, 2));
-        board.row();
-        board.add(builder.create(1, 0));
-        board.add(builder.create(1, 1));
-        board.add(builder.create(1, 2));
-        board.row();
-        board.add(builder.create(2, 0));
-        board.add(builder.create(2, 1));
-        board.add(builder.create(2, 2));
+        this.board.add(builder.create(0, 0));
+        this.board.add(builder.create(0, 1));
+        this.board.add(builder.create(0, 2));
+        this.board.row();
+        this.board.add(builder.create(1, 0));
+        this.board.add(builder.create(1, 1));
+        this.board.add(builder.create(1, 2));
+        this.board.row();
+        this.board.add(builder.create(2, 0));
+        this.board.add(builder.create(2, 1));
+        this.board.add(builder.create(2, 2));
 
         Window controls = new Window("Controls", this.skin);
 
@@ -111,6 +120,33 @@ public class RoomScreen extends Listener implements Screen {
         this.stage.addActor(splitPane);
 
         Gdx.input.setInputProcessor(this.stage);
+
+        // Get status of board
+
+
+        Timer.schedule(new JTask(() -> this.client.sendTCP(new BoardRequest())), 0f, 3f);
+    }
+
+    @Override
+    public void received(Connection connection, Object object) {
+        if (object instanceof BoardResponse) {
+            final String[][] boardState = ((BoardResponse) object).board;
+            this.board.getCells().forEach(cell -> {
+                final TicTacToeBoxActor actor = (TicTacToeBoxActor)cell.getActor();
+                final String cellState = boardState[actor.getxPos()][actor.getyPos()];
+                switch (cellState) {
+                    case "waffelmonster":
+                        actor.setState(X);
+                        break;
+                    case "pop4959":
+                        actor.setState(O);
+                        break;
+                    default:
+                        actor.setState(BLANK);
+                        break;
+                }
+            });
+        }
     }
 
     @Override
