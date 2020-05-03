@@ -38,7 +38,8 @@ public class ServerLauncher {
                 MoveRequest.class, MoveResponse.class,
                 ResetRequest.class, ResetResponse.class,
                 BoardRequest.class, BoardResponse.class,
-                RoomChatRequest.class, RoomChatResponse.class
+                RoomChatRequest.class, RoomChatResponse.class,
+                String[].class, String[][].class
         ).forEach(kryo::register);
         server.addListener(new Listener() {
             @Override

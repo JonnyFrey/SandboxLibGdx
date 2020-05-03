@@ -27,6 +27,10 @@ public class TicTacToeRoom extends Room {
         if (board[x][y] != null) {
             return false;
         }
+        // Can't make a move if the game is over
+        if (isGameOver()) {
+            return false;
+        }
         board[x][y] = playerName;
         currentPlayer = playerName;
         return true;
