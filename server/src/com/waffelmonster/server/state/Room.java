@@ -34,10 +34,10 @@ public class Room {
         return players;
     }
 
-    public boolean join(Connection connection, Player player) {
-        boolean hasJoined = this.players.containsKey(connection);
+    public boolean join(Player player) {
+        boolean hasJoined = this.players.containsKey(player.getConnection());
         if (!hasJoined) {
-            this.players.put(connection, player);
+            this.players.put(player.getConnection(), player);
         }
         return !hasJoined;
     }

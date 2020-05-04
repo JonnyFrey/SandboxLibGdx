@@ -12,6 +12,7 @@ import com.waffelmonster.message.RoomChatRequest;
 import com.waffelmonster.message.RoomChatResponse;
 import com.waffelmonster.message.tictactoe.BoardRequest;
 import com.waffelmonster.message.tictactoe.BoardResponse;
+import com.waffelmonster.message.tictactoe.GameUpdate;
 import com.waffelmonster.message.tictactoe.MoveRequest;
 import com.waffelmonster.message.tictactoe.MoveResponse;
 import com.waffelmonster.message.tictactoe.ResetRequest;
@@ -38,33 +39,34 @@ public class ServerLauncher {
                 MoveRequest.class, MoveResponse.class,
                 ResetRequest.class, ResetResponse.class,
                 BoardRequest.class, BoardResponse.class,
+                GameUpdate.class,
                 RoomChatRequest.class, RoomChatResponse.class,
                 String[].class, String[][].class
         ).forEach(kryo::register);
         server.addListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {
-                System.out.println(connection.getRemoteAddressTCP());
                 if (object instanceof ConnectRequest) {
                     ConnectRequest connectRequest = (ConnectRequest) object;
-                    System.out.println(connectRequest.playerName);
-                    Player player = new Player(connectRequest.playerName);
+                    Player player = new Player(connection, connectRequest.playerName);
                     ConnectResponse connectResponse = new ConnectResponse();
-                    connectResponse.success = ticTacToeRoom.join(connection, player);
+                    connectResponse.success = ticTacToeRoom.join(player);
                     connection.sendTCP(connectResponse);
-                } else if (object instanceof DisconnectRequest) {
+                }
+                // The client must send a successful connect request before the server will respond to anything else.
+                Player player = ticTacToeRoom.getPlayer(connection);
+                if (player == null) {
+                    return;
+                }
+                if (object instanceof DisconnectRequest) {
                     DisconnectResponse disconnectResponse = new DisconnectResponse();
                     disconnectResponse.success = ticTacToeRoom.quit(connection);
                     connection.sendTCP(disconnectResponse);
                 } else if (object instanceof MoveRequest) {
                     MoveRequest moveRequest = (MoveRequest) object;
-                    MoveResponse moveResponse = new MoveResponse();
-                    moveResponse.success = ticTacToeRoom.move(moveRequest.playerName, moveRequest.x, moveRequest.y);
-                    connection.sendTCP(moveResponse);
+                    ticTacToeRoom.move(player, moveRequest.x, moveRequest.y);
                 } else if (object instanceof ResetRequest) {
-                    ResetResponse resetResponse = new ResetResponse();
-                    resetResponse.success = ticTacToeRoom.reset();
-                    connection.sendTCP(resetResponse);
+                    ticTacToeRoom.reset(player);
                 } else if (object instanceof BoardRequest) {
                     BoardResponse boardResponse = new BoardResponse();
                     boardResponse.board = ticTacToeRoom.getBoard();
