@@ -27,20 +27,24 @@ public class TicTacToeRoom extends Room {
         // Can't make a move if there are already two players playing
         if (this.playing.size() >= 2 && !this.playing.contains(player)) {
             sendMoveResponse(player, false);
+            return;
         }
         // Can't make a move if it isn't your turn
         if (currentPlayer != null && currentPlayer.getName().equals(player.getName())) {
             sendMoveResponse(player, false);
+            return;
         }
         // Can't make a move in a square that is already taken
         if (board[x][y] != null) {
             sendMoveResponse(player, false);
+            return;
         }
         // Can't make a move if the game is over
         if (isGameOver()) {
             sendMoveResponse(player, false);
+            return;
         }
-        if (this.playing.size() < 2) {
+        if (this.playing.size() < 2 && !this.playing.contains(player)) {
             this.playing.add(player);
         }
         board[x][y] = player.getName();
@@ -50,15 +54,11 @@ public class TicTacToeRoom extends Room {
     }
 
     public void reset(Player player) {
-        boolean gameOver = isGameOver();
-        if (gameOver) {
-            this.board = new String[3][3];
-            this.currentPlayer = null;
-            this.playing = new ArrayList<>(2);
-            sendResetResponse(player, true);
-            sendGameUpdate(this.getPlayers().values());
-        }
-        sendResetResponse(player, false);
+        this.board = new String[3][3];
+        this.currentPlayer = null;
+        this.playing = new ArrayList<>(2);
+        sendResetResponse(player, true);
+        sendGameUpdate(this.getPlayers().values());
     }
 
     private boolean isGameOver() {
@@ -102,7 +102,7 @@ public class TicTacToeRoom extends Room {
         GameUpdate gameUpdate = new GameUpdate();
         gameUpdate.gameOver = isGameOver();
         gameUpdate.currentPlayer = this.currentPlayer == null ? null : this.currentPlayer.getName();
-        gameUpdate.playing = (String[]) this.playing.toArray();
+        gameUpdate.playing = this.playing.stream().filter(Objects::nonNull).map(Player::getName).toArray(String[]::new);
         gameUpdate.board = this.board;
         for (Player player : players) {
             player.getConnection().sendTCP(gameUpdate);
