@@ -101,7 +101,7 @@ public class TicTacToeRoom extends Room {
     public void sendGameUpdate(Collection<Player> players) {
         GameUpdate gameUpdate = new GameUpdate();
         gameUpdate.gameOver = isGameOver();
-        gameUpdate.currentPlayer = this.currentPlayer.getName();
+        gameUpdate.currentPlayer = this.currentPlayer == null ? null : this.currentPlayer.getName();
         gameUpdate.playing = (String[]) this.playing.toArray();
         gameUpdate.board = this.board;
         for (Player player : players) {
