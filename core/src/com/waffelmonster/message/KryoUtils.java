@@ -17,7 +17,7 @@ public class KryoUtils {
                 DisconnectRequest.class, DisconnectResponse.class,
                 MoveRequest.class, MoveResponse.class,
                 ResetRequest.class, ResetResponse.class,
-                BoardRequest.class, BoardResponse.class,
+                BoardRequest.class,
                 RoomChatRequest.class, RoomChatResponse.class,
                 GameUpdate.class,
                 String[].class, String[][].class
