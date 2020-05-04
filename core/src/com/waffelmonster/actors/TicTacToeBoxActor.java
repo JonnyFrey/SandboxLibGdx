@@ -4,6 +4,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.esotericsoftware.kryonet.Client;
+import com.waffelmonster.message.tictactoe.MoveRequest;
 
 public class TicTacToeBoxActor extends Image {
 
@@ -16,8 +18,10 @@ public class TicTacToeBoxActor extends Image {
     private final Drawable oDraw;
     private final int xPos;
     private final int yPos;
+    private final Client client;
 
-    public TicTacToeBoxActor(final Drawable blankDraw, final Drawable xDraw, final Drawable oDraw, int xPos, int yPos) {
+    public TicTacToeBoxActor(final Client client, final Drawable blankDraw, final Drawable xDraw, final Drawable oDraw, int xPos, int yPos) {
+        this.client = client;
         this.blankDraw = blankDraw;
         this.xDraw = xDraw;
         this.oDraw = oDraw;
@@ -32,6 +36,11 @@ public class TicTacToeBoxActor extends Image {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if(super.touchDown(event, x, y, pointer, button)) {
                     System.out.println("Clicked " + xPos + " " + yPos);
+                    final MoveRequest request = new MoveRequest();
+                    request.x = xPos;
+                    request.y = yPos;
+                    client.sendTCP(request);
+                    return true;
                 }
                 return false;
             }
@@ -59,18 +68,20 @@ public class TicTacToeBoxActor extends Image {
 
     public static class BoxBuilder {
 
+        private final Client client;
         private final Drawable blank;
         private final Drawable x;
         private final Drawable o;
 
-        public BoxBuilder(Drawable blank, Drawable x, Drawable o) {
+        public BoxBuilder(Client client, Drawable blank, Drawable x, Drawable o) {
+            this.client = client;
             this.blank = blank;
             this.x = x;
             this.o = o;
         }
 
         public TicTacToeBoxActor create(int xPos, int yPos) {
-            return new TicTacToeBoxActor(this.blank, this.x, this.o, xPos, yPos);
+            return new TicTacToeBoxActor(this.client, this.blank, this.x, this.o, xPos, yPos);
         }
 
     }

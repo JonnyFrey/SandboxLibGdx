@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Timer;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -19,8 +18,8 @@ import com.waffelmonster.SandboxGame;
 import com.waffelmonster.actors.TicTacToeBoxActor;
 import com.waffelmonster.assets.AssetUtils;
 import com.waffelmonster.assets.Textures;
-import com.waffelmonster.compat.JTask;
 import com.waffelmonster.message.tictactoe.BoardRequest;
+import com.waffelmonster.message.tictactoe.GameUpdate;
 
 import static com.waffelmonster.GameModule.NEON_SKIN;
 import static com.waffelmonster.actors.TicTacToeBoxActor.State.*;
@@ -52,6 +51,8 @@ public class RoomScreen extends Listener implements Screen {
         this.boardTexture = assetUtils.get(Textures.BOARD);
         this.xTexture = assetUtils.get(Textures.X);
         this.oTexture = assetUtils.get(Textures.O);
+
+        this.client.addListener(this);
 
     }
 
@@ -90,7 +91,7 @@ public class RoomScreen extends Listener implements Screen {
         ));
 
         final TicTacToeBoxActor.BoxBuilder builder = new TicTacToeBoxActor.BoxBuilder(
-                blank, xImage, oImage
+                client, blank, xImage, oImage
         );
 
         this.board.add(builder.create(0, 0));
@@ -121,26 +122,26 @@ public class RoomScreen extends Listener implements Screen {
         // Get status of board
 
 
-        Timer.schedule(new JTask(() -> this.client.sendTCP(new BoardRequest())), 0f, 3f);
+        this.client.sendTCP(new BoardRequest());
     }
 
     @Override
     public void received(Connection connection, Object object) {
-        if (object instanceof BoardResponse) {
-            final String[][] boardState = ((BoardResponse) object).board;
+        if (object instanceof GameUpdate) {
+            final GameUpdate update = ((GameUpdate) object);
+
             this.board.getCells().forEach(cell -> {
                 final TicTacToeBoxActor actor = (TicTacToeBoxActor)cell.getActor();
-                final String cellState = boardState[actor.getxPos()][actor.getyPos()];
-                switch (cellState) {
-                    case "waffelmonster":
-                        actor.setState(X);
-                        break;
-                    case "pop4959":
-                        actor.setState(O);
-                        break;
-                    default:
-                        actor.setState(BLANK);
-                        break;
+                final String cellState = update.board[actor.getxPos()][actor.getyPos()];
+
+                if (cellState == null) {
+                    actor.setState(BLANK);
+                } else if (cellState.equals(update.playing[0])) {
+                    actor.setState(X);
+                } else if (cellState.equals(update.playing[1])){
+                    actor.setState(O);
+                } else {
+                    System.out.println("ERROR, THIS SHOULDNT HAPPEND");
                 }
             });
         }

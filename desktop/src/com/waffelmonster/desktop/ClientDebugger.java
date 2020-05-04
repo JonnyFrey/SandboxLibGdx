@@ -25,16 +25,7 @@ public class ClientDebugger extends Listener {
         this.client = new Client();
         this.name = name;
 
-        final Kryo kryo = client.getKryo();
-        Arrays.asList(
-                ConnectRequest.class, ConnectResponse.class,
-                DisconnectRequest.class, DisconnectResponse.class,
-                MoveRequest.class, MoveResponse.class,
-                ResetRequest.class, ResetResponse.class,
-                BoardRequest.class, BoardResponse.class,
-                RoomChatRequest.class, RoomChatResponse.class,
-                String[].class, String[][].class
-        ).forEach(kryo::register);
+        KryoUtils.registerMessages(client.getKryo());
 
         client.addListener(this);
 
