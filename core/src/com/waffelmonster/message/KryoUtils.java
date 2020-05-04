@@ -19,6 +19,7 @@ public class KryoUtils {
                 ResetRequest.class, ResetResponse.class,
                 BoardRequest.class, BoardResponse.class,
                 RoomChatRequest.class, RoomChatResponse.class,
+                GameUpdate.class,
                 String[].class, String[][].class
         ).forEach(kryo::register);
     }

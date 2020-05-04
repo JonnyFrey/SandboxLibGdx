@@ -61,7 +61,6 @@ public class ClientDebugger extends Listener {
 
     public void makeMove(int x, int y) {
         final MoveRequest request = new MoveRequest();
-        request.playerName = this.name;
         request.x = x;
         request.y = y;
         this.client.sendTCP(request);
