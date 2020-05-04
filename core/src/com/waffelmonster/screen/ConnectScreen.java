@@ -15,7 +15,9 @@ import com.esotericsoftware.kryonet.Listener;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.waffelmonster.SandboxGame;
+import com.waffelmonster.assets.AssetUtils;
 import com.waffelmonster.assets.Screens;
+import com.waffelmonster.assets.Textures;
 import com.waffelmonster.compat.JChangeListener;
 import com.waffelmonster.compat.JTask;
 import com.waffelmonster.message.ConnectRequest;
@@ -25,7 +27,6 @@ import java.io.IOException;
 
 import static com.kotcrab.vis.ui.widget.VisWindow.FADE_TIME;
 import static com.waffelmonster.GameModule.NEON_SKIN;
-import static com.waffelmonster.GameModule.SPLASH_TEXTURE;
 
 public class ConnectScreen extends Listener implements Screen {
 
@@ -41,13 +42,13 @@ public class ConnectScreen extends Listener implements Screen {
     public ConnectScreen(
             final SandboxGame game,
             final Client client,
-            @Named(NEON_SKIN) final Skin skin,
-            @Named(SPLASH_TEXTURE) final Texture splashTexture
-            ) {
+            final AssetUtils assetUtils,
+            @Named(NEON_SKIN) final Skin skin
+    ) {
         this.game = game;
         this.client = client;
         this.skin = skin;
-        this.splashTexture = splashTexture;
+        this.splashTexture = assetUtils.get(Textures.SPLASH);
 
         this.messageLabel = new Label(null, skin);
         this.messageLabel.setVisible(false);
@@ -161,12 +162,13 @@ public class ConnectScreen extends Listener implements Screen {
                 (Gdx.graphics.getHeight() / 24f * 3) - button.getHeight() / 2f
         );
 
-        this.stage.addListener(new JChangeListener((changeEvent, actor) -> {
-            if (actor.equals(button)) {
-                this.messageLabel.setVisible(false);
-                System.out.println("Attempting to connect");
+        button.addListener(new JChangeListener((changeEvent, actor) -> {
+            this.messageLabel.setVisible(false);
+            System.out.println("Attempting to connect");
+
+            Timer.post(new JTask(() -> {
                 try {
-                    this.client.connect(3000, connectionField.getText(), 42069);
+                    this.client.connect(1000, connectionField.getText(), 42069);
 
                     final ConnectRequest request = new ConnectRequest();
                     request.playerName = usernameField.getText();
@@ -177,7 +179,8 @@ public class ConnectScreen extends Listener implements Screen {
                     System.out.println("Failed");
                     showMessage("Failed to connect to server", Color.RED);
                 }
-            }
+            }));
+            System.out.println("Job Done");
         }));
 
         Gdx.input.setInputProcessor(this.stage);

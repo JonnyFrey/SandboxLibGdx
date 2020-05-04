@@ -4,12 +4,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import com.waffelmonster.message.ConnectRequest;
-import com.waffelmonster.message.ConnectResponse;
-import com.waffelmonster.message.DisconnectRequest;
-import com.waffelmonster.message.DisconnectResponse;
-import com.waffelmonster.message.RoomChatRequest;
-import com.waffelmonster.message.RoomChatResponse;
+import com.waffelmonster.message.*;
 import com.waffelmonster.message.tictactoe.BoardRequest;
 import com.waffelmonster.message.tictactoe.BoardResponse;
 import com.waffelmonster.message.tictactoe.GameUpdate;
@@ -32,17 +27,7 @@ public class ServerLauncher {
         Server server = new Server();
         server.start();
         server.bind(PORT);
-        Kryo kryo = server.getKryo();
-        Arrays.asList(
-                ConnectRequest.class, ConnectResponse.class,
-                DisconnectRequest.class, DisconnectResponse.class,
-                MoveRequest.class, MoveResponse.class,
-                ResetRequest.class, ResetResponse.class,
-                BoardRequest.class, BoardResponse.class,
-                GameUpdate.class,
-                RoomChatRequest.class, RoomChatResponse.class,
-                String[].class, String[][].class
-        ).forEach(kryo::register);
+        KryoUtils.registerMessages(server.getKryo());
         server.addListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {
