@@ -8,6 +8,7 @@ import com.waffelmonster.server.state.Room;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,30 +23,22 @@ public class TicTacToeRoom extends Room {
         this.playing = new ArrayList<>(2);
     }
 
-    public String[][] getBoard() {
-        return this.board;
-    }
-
     public void move(Player player, int x, int y) {
         // Can't make a move if there are already two players playing
         if (this.playing.size() >= 2 && !this.playing.contains(player)) {
             sendMoveResponse(player, false);
-            sendGameUpdate();
         }
         // Can't make a move if it isn't your turn
         if (currentPlayer != null && currentPlayer.getName().equals(player.getName())) {
             sendMoveResponse(player, false);
-            sendGameUpdate();
         }
         // Can't make a move in a square that is already taken
         if (board[x][y] != null) {
             sendMoveResponse(player, false);
-            sendGameUpdate();
         }
         // Can't make a move if the game is over
         if (isGameOver()) {
             sendMoveResponse(player, false);
-            sendGameUpdate();
         }
         if (this.playing.size() < 2) {
             this.playing.add(player);
@@ -53,7 +46,7 @@ public class TicTacToeRoom extends Room {
         board[x][y] = player.getName();
         currentPlayer = player;
         sendMoveResponse(player, true);
-        sendGameUpdate();
+        sendGameUpdate(this.getPlayers().values());
     }
 
     public void reset(Player player) {
@@ -63,7 +56,7 @@ public class TicTacToeRoom extends Room {
             this.currentPlayer = null;
             this.playing = new ArrayList<>(2);
             sendResetResponse(player, true);
-            sendGameUpdate();
+            sendGameUpdate(this.getPlayers().values());
         }
         sendResetResponse(player, false);
     }
@@ -105,13 +98,13 @@ public class TicTacToeRoom extends Room {
         player.getConnection().sendTCP(resetResponse);
     }
 
-    private void sendGameUpdate() {
+    public void sendGameUpdate(Collection<Player> players) {
         GameUpdate gameUpdate = new GameUpdate();
         gameUpdate.gameOver = isGameOver();
         gameUpdate.currentPlayer = this.currentPlayer.getName();
         gameUpdate.playing = (String[]) this.playing.toArray();
-        gameUpdate.board = this.getBoard();
-        for (Player player : this.getPlayers().values()) {
+        gameUpdate.board = this.board;
+        for (Player player : players) {
             player.getConnection().sendTCP(gameUpdate);
         }
     }

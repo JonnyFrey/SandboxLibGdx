@@ -1,23 +1,19 @@
 package com.waffelmonster.server;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.waffelmonster.message.*;
 import com.waffelmonster.message.tictactoe.BoardRequest;
-import com.waffelmonster.message.tictactoe.BoardResponse;
-import com.waffelmonster.message.tictactoe.GameUpdate;
 import com.waffelmonster.message.tictactoe.MoveRequest;
-import com.waffelmonster.message.tictactoe.MoveResponse;
 import com.waffelmonster.message.tictactoe.ResetRequest;
-import com.waffelmonster.message.tictactoe.ResetResponse;
 import com.waffelmonster.server.state.ChatMessage;
 import com.waffelmonster.server.state.Player;
 import com.waffelmonster.server.state.tictactoe.TicTacToeRoom;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class ServerLauncher {
     private static final int PORT = 42069;
@@ -53,9 +49,7 @@ public class ServerLauncher {
                 } else if (object instanceof ResetRequest) {
                     ticTacToeRoom.reset(player);
                 } else if (object instanceof BoardRequest) {
-                    BoardResponse boardResponse = new BoardResponse();
-                    boardResponse.board = ticTacToeRoom.getBoard();
-                    connection.sendTCP(boardResponse);
+                    ticTacToeRoom.sendGameUpdate(Collections.singletonList(player));
                 } else if (object instanceof RoomChatRequest) {
                     RoomChatRequest roomChatRequest = (RoomChatRequest) object;
                     ChatMessage chatMessage = new ChatMessage(ticTacToeRoom.getPlayer(connection), roomChatRequest.message);
