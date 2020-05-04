@@ -17,6 +17,7 @@ import com.google.inject.name.Named;
 import com.waffelmonster.SandboxGame;
 import com.waffelmonster.actors.TicTacToeBoxActor;
 import com.waffelmonster.assets.AssetUtils;
+import com.waffelmonster.assets.Screens;
 import com.waffelmonster.assets.Textures;
 import com.waffelmonster.message.tictactoe.BoardRequest;
 import com.waffelmonster.message.tictactoe.GameUpdate;
@@ -145,6 +146,11 @@ public class RoomScreen extends Listener implements Screen {
                 }
             });
         }
+    }
+
+    @Override
+    public void disconnected(Connection connection) {
+        this.game.transition(Screens.CONNECT);
     }
 
     @Override
