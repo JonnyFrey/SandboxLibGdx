@@ -19,8 +19,10 @@ import com.waffelmonster.actors.TicTacToeBoxActor;
 import com.waffelmonster.assets.AssetUtils;
 import com.waffelmonster.assets.Screens;
 import com.waffelmonster.assets.Textures;
+import com.waffelmonster.compat.JChangeListener;
 import com.waffelmonster.message.tictactoe.BoardRequest;
 import com.waffelmonster.message.tictactoe.GameUpdate;
+import com.waffelmonster.message.tictactoe.ResetRequest;
 
 import static com.waffelmonster.GameModule.NEON_SKIN;
 import static com.waffelmonster.actors.TicTacToeBoxActor.State.*;
@@ -108,6 +110,16 @@ public class RoomScreen extends Listener implements Screen {
         this.board.add(builder.create(2, 2));
 
         Window controls = new Window("Controls", this.skin);
+
+        Button reset = new TextButton("Reset", this.skin);
+        controls.add(reset);
+
+        reset.addListener(new JChangeListener((changeEvent, actor) -> {
+                    System.out.println("Attempting to reset");
+                    this.client.sendTCP(new ResetRequest());
+                }
+            )
+        );
 
         SplitPane splitPane = new SplitPane(board, controls, false, this.skin);
         splitPane.setSplitAmount(0.75f);
